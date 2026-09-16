@@ -6,7 +6,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>黑珍珠業務日報</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
+#map{height:460px;border-radius:10px;border:1px solid var(--line);background:var(--card)}
+.leaflet-popup-content{font-family:inherit;font-size:13px;line-height:1.45;margin:10px 12px}
+.leaflet-popup-content b{font-size:14px}
+.nogeo{font-size:12px;color:var(--mute);margin-top:6px}
 :root{--bg:#f2f3f1;--card:#ffffff;--ink:#1b2226;--mute:#66707a;--line:#e1e4e2;--acc:#0e5a6b;--accsoft:#dcebee;
 --ok:#12794a;--okbg:#e1f3e9;--wait:#8a5b00;--waitbg:#fbf0d4;--bad:#b3261e;--badbg:#fbe4e1;--info:#3b4fa0;--infobg:#e4e8f8;--grey:#5b6570;--greybg:#e9ecee}
 @media (prefers-color-scheme:dark){:root{--bg:#121719;--card:#1a2125;--ink:#e6eaec;--mute:#96a1a8;--line:#2a3338;--acc:#6cc3d5;--accsoft:#16353c;
@@ -99,6 +105,12 @@ tr:last-child td{border-bottom:0}
 </header>
 
 <div id="main"><div class="state">讀取資料中…</div></div>
+
+<section>
+  <h2>拜訪地圖 <small id="maptitle"></small></h2>
+  <div id="map"></div>
+  <div class="nogeo" id="nogeo"></div>
+</section>
 
 <section>
   <h2>客戶查詢 <small>輸入店名，查所有拜訪紀錄</small></h2>
@@ -205,6 +217,29 @@ function render(){
   <section><h2>本月累計 <small>${mon.replace("-","/")}</small></h2><div class="panel"><div class="mkpis">
     <span>出勤 <b class="num">${mdays}</b> 天</span><span>拜訪 <b class="num">${mrows.length}</b> 家</span><span>新客戶 <b class="num">${mnew}</b></span><span>成交 <b class="num">${mord}</b> 家（${mrows.length?Math.round(mord/mrows.length*100):0}%）</span><span>客訴 <b class="num">${mcomp}</b></span>
   </div></div></section></div>`;
+  renderMap(rows);
+}
+
+/* ---------- map ---------- */
+let map,layer;
+function renderMap(rows){
+  if(!window.L)return;
+  if(!map){
+    map=L.map("map",{scrollWheelZoom:false}).setView([23.7,120.9],7);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+    layer=L.layerGroup().addTo(map);
+  }
+  layer.clearLayers();
+  const pts=rows.filter(v=>v.lat&&v.lng),miss=rows.filter(v=>!(v.lat&&v.lng));
+  $("#maptitle").textContent=`${fmtDate(date)}｜紅點 ${pts.length} 家`;
+  pts.forEach(v=>{
+    const m=L.circleMarker([v.lat,v.lng],{radius:9,color:"#fff",weight:2,fillColor:"#d7263d",fillOpacity:.95}).addTo(layer);
+    m.bindPopup(`<b>${esc(v.customer)}</b><br>${esc(v.time)}｜${esc(v.region)}｜${RES[v.result]||esc(v.result)}${v.products?.length?`<br>${prodTxt(v)}`:""}${v.note?`<br><span style="color:#666">${esc(v.note)}</span>`:""}<br><a href="${maps(v)}" target="_blank" rel="noopener">在 Google 地圖開啟</a>`);
+    m.bindTooltip(v.customer,{direction:"top",offset:[0,-8]});
+  });
+  if(pts.length){const b=L.latLngBounds(pts.map(v=>[v.lat,v.lng]));map.fitBounds(b.pad(0.25),{maxZoom:13});}
+  $("#nogeo").textContent=miss.length?`沒有座標（未標在地圖上）：${miss.map(v=>v.customer).join("、")}`:"";
+  setTimeout(()=>map.invalidateSize(),50);
 }
 
 function search(q){
