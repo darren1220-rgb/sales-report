@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>黑珍珠業務日報</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{--bg:#f2f3f1;--card:#ffffff;--ink:#1b2226;--mute:#66707a;--line:#e1e4e2;--acc:#0e5a6b;--accsoft:#dcebee;
+--ok:#12794a;--okbg:#e1f3e9;--wait:#8a5b00;--waitbg:#fbf0d4;--bad:#b3261e;--badbg:#fbe4e1;--info:#3b4fa0;--infobg:#e4e8f8;--grey:#5b6570;--greybg:#e9ecee}
+@media (prefers-color-scheme:dark){:root{--bg:#121719;--card:#1a2125;--ink:#e6eaec;--mute:#96a1a8;--line:#2a3338;--acc:#6cc3d5;--accsoft:#16353c;
+--ok:#6fd8a2;--okbg:#123526;--wait:#f0c45e;--waitbg:#3a2e0f;--bad:#ff8f84;--badbg:#401a17;--info:#a9b8ff;--infobg:#1f2748;--grey:#aab4bd;--greybg:#252d33}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",-apple-system,"PingFang TC",sans-serif;font-size:14px;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{margin:0;font-size:22px;font-weight:700;letter-spacing:.02em}
+.sub{color:var(--mute);font-size:12px;margin-top:2px}
+.num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px}
+.seg button{border:0;background:transparent;color:var(--mute);font:inherit;padding:6px 12px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--acc);color:var(--card)}
+input,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.nav{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.kpi{background:var(--card);padding:12px 14px}
+.kpi b{display:block;font-size:26px;line-height:1.2}
+.kpi span{color:var(--mute);font-size:12px}
+h2{font-size:15px;margin:0 0 8px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+h2 small{color:var(--mute);font-weight:400;font-size:12px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:700px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.06em;color:var(--mute);font-weight:500}
+tr:last-child td{border-bottom:0}
+.reg{font-size:11px;color:var(--acc);background:var(--accsoft);padding:1px 6px;border-radius:4px;white-space:nowrap}
+.cust{font-weight:500}
+.maps{display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--acc);text-decoration:none;margin-top:2px}
+.maps:hover{text-decoration:underline}
+.pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.order,.delivery{background:var(--okbg);color:var(--ok)}.stock{background:var(--waitbg);color:var(--wait)}
+.complaint,.closed{background:var(--badbg);color:var(--bad)}.discuss,.sample{background:var(--infobg);color:var(--info)}
+.absent,.other{background:var(--greybg);color:var(--grey)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.list{list-style:none;margin:0;padding:4px 0}
+.list li{padding:9px 14px;border-bottom:1px solid var(--line);display:flex;gap:10px;justify-content:space-between}
+.list li:last-child{border-bottom:0}
+.empty{padding:18px 14px;color:var(--mute)}
+.state{padding:40px 16px;text-align:center;color:var(--mute)}
+.mkpis{display:flex;flex-wrap:wrap;gap:6px 18px;padding:12px 14px;font-size:13px;color:var(--mute)}
+.mkpis b{color:var(--ink)}
+.note{color:var(--mute);font-size:12px}
+/* login */
+#login[hidden]{display:none}
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 24px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
+.box h1{font-size:20px}
+.box label{font-size:12px;color:var(--mute);display:flex;flex-direction:column;gap:4px}
+.box input{padding:10px 12px;font-size:16px}
+.box .go{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:11px;font:inherit;font-size:15px;cursor:pointer}
+.box .go[disabled]{opacity:.6}
+.err{color:var(--bad);font-size:13px;min-height:1.2em}
+.chk{flex-direction:row!important;align-items:center;gap:8px!important}
+.link{background:none;border:0;color:var(--mute);font:inherit;font-size:12px;cursor:pointer;text-decoration:underline}
+@media(max-width:680px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <form class="box" id="lf">
+    <h1>黑珍珠業務日報</h1>
+    <label>帳號<input id="u" autocomplete="username" autocapitalize="off" required></label>
+    <label>密碼<input id="p" type="password" autocomplete="current-password" required></label>
+    <label class="chk"><input type="checkbox" id="remember" checked style="width:auto"> 在這台裝置記住我</label>
+    <button class="go" id="go" type="submit">登入</button>
+    <div class="err" id="err"></div>
+  </form>
+</div>
+
+<div class="wrap" id="app" hidden>
+<header>
+  <div><h1>黑珍珠業務日報</h1><div class="sub" id="sub"></div></div>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="區域">
+      <button data-r="all" aria-pressed="true">全部</button>
+      <button data-r="中區" aria-pressed="false">中區</button>
+      <button data-r="南區" aria-pressed="false">南區</button>
+    </div>
+    <button class="nav" id="prev" aria-label="前一天">‹</button>
+    <input type="date" id="date" aria-label="日期">
+    <button class="nav" id="next" aria-label="後一天">›</button>
+    <button class="nav" id="latest">最新</button>
+    <button class="link" id="logout">登出</button>
+  </div>
+</header>
+
+<div id="main"><div class="state">讀取資料中…</div></div>
+
+<section>
+  <h2>客戶查詢 <small>輸入店名，查所有拜訪紀錄</small></h2>
+  <div style="display:flex;gap:8px;margin-bottom:8px"><input type="search" id="q" placeholder="例如：捷鑫" style="flex:1;max-width:320px"></div>
+  <div class="panel" id="qres"><div class="empty">輸入店名後顯示。</div></div>
+</section>
+</div>
+
+<script>
+const RES={order:"訂購",delivery:"送貨/收款",stock:"有庫存",discuss:"產品討論",sample:"樣品/測試",complaint:"客訴",closed:"結束營業",absent:"老闆不在",other:"其他"};
+const WD="日一二三四五六";
+let all=[],dates=[],region="all",date="";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtDate=d=>{if(!d)return"";const t=new Date(d+"T00:00:00");return `${d.slice(0,4)}/${d.slice(5,7)}/${d.slice(8)}（${WD[t.getDay()]}）`};
+const maps=v=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(v.mapQuery||v.customer);
+const prodTxt=v=>(v.products||[]).map(p=>`${esc(p.name)}${p.qty?` ×<span class="num">${p.qty}${esc(p.unit||"")}</span>`:""}`).join("、");
+const pill=v=>`<span class="pill ${esc(v.result)}">${RES[v.result]||esc(v.result)}</span>`;
+const mapLink=v=>`<a class="maps" href="${maps(v)}" target="_blank" rel="noopener">📍 地圖${v.mapConfidence==="low"?"（店名搜尋）":""}</a>`;
+
+/* ---------- crypto ---------- */
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function decryptFile(f,user,pass){
+  const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(user+":"+pass),"PBKDF2",false,["deriveKey"]);
+  const k=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(f.salt),iterations:f.iter||200000,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
+  const raw=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(f.iv)},k,b64(f.ct));
+  const ds=new DecompressionStream("gzip");
+  const txt=await new Response(new Blob([raw]).stream().pipeThrough(ds)).text();
+  return JSON.parse(txt);
+}
+async function getJSON(p){const r=await fetch(p+"?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("fetch");return r.json();}
+async function load(user,pass){
+  const man=await getJSON("manifest.json");
+  const parts=await Promise.all(man.files.map(async f=>decryptFile(await getJSON(f),user,pass)));
+  const byKey=new Map();
+  parts.forEach(d=>(d.months||[]).forEach(m=>byKey.set(m.region+"|"+m.month,m)));
+  return {months:[...byKey.values()],updatedAt:man.updatedAt||""};
+}
+
+/* ---------- login ---------- */
+const LS="sr_cred";
+function setData(d){
+  all=[];
+  (d.months||[]).forEach(m=>Object.entries(m.days||{}).forEach(([day,vs])=>vs.forEach(v=>all.push({...v,region:m.region,date:day}))));
+  dates=[...new Set(all.map(v=>v.date))].sort();
+  $("#sub").textContent=`來源：LINE 中區／南區業務群｜${dates[0]?.slice(0,7).replace("-","/")} 起｜資料更新 ${d.updatedAt||""}`;
+  $("#login").hidden=true;$("#app").hidden=false;
+  if(!dates.includes(date))date=dates[dates.length-1]||"";
+  render();
+}
+async function tryLogin(user,pass,remember){
+  $("#go").disabled=true;$("#err").textContent="";
+  try{
+    const d=await load(user,pass);
+    if(remember){try{localStorage.setItem(LS,JSON.stringify({u:user,p:pass}))}catch(e){}}
+    setData(d);
+  }catch(e){
+    $("#err").textContent=e.message==="fetch"?"讀不到資料檔，請稍後再試。":"帳號或密碼錯誤。";
+    try{localStorage.removeItem(LS)}catch(e2){}
+  }finally{$("#go").disabled=false;}
+}
+$("#lf").addEventListener("submit",e=>{e.preventDefault();tryLogin($("#u").value.trim(),$("#p").value,$("#remember").checked);});
+$("#logout").addEventListener("click",()=>{try{localStorage.removeItem(LS)}catch(e){}location.reload();});
+(()=>{try{const c=JSON.parse(localStorage.getItem(LS)||"null");if(c&&c.u){$("#u").value=c.u;$("#p").value=c.p;tryLogin(c.u,c.p,true);}}catch(e){}})();
+
+/* ---------- report ---------- */
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
+  region=b.dataset.r;document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
+$("#date").addEventListener("change",e=>{date=e.target.value;render();});
+$("#prev").addEventListener("click",()=>step(-1));$("#next").addEventListener("click",()=>step(1));
+$("#latest").addEventListener("click",()=>{date=dates[dates.length-1];render();});
+$("#q").addEventListener("input",e=>search(e.target.value.trim()));
+function step(d){const i=dates.indexOf(date);let j;if(i>=0)j=i+d;else{const k=dates.findIndex(x=>x>date);j=d>0?k:k-1;}if(j<0||j>=dates.length)return;date=dates[j];render();}
+
+function rowsHtml(rows,showDate){return `<table><thead><tr>${showDate?"<th>日期</th>":""}<th>時間</th><th>區域</th><th>業務</th><th>客戶／地圖</th><th>結果</th><th>訂購內容／說明</th></tr></thead><tbody>
+${rows.map(v=>`<tr>${showDate?`<td class="num">${v.date}</td>`:""}<td class="num">${esc(v.time)}</td><td><span class="reg">${esc(v.region)}</span></td><td>${esc(v.rep)}</td>
+<td><div class="cust">${esc(v.customer)}</div>${mapLink(v)}</td><td>${pill(v)}</td>
+<td>${prodTxt(v)}${v.note?`<div class="note">${esc(v.note)}</div>`:""}</td></tr>`).join("")}</tbody></table>`;}
+
+function render(){
+  if(!date)date=dates[dates.length-1]||"";
+  $("#date").value=date;$("#date").min=dates[0]||"";$("#date").max=dates[dates.length-1]||"";
+  const inR=v=>region==="all"||v.region===region;
+  const rows=all.filter(v=>v.date===date&&inR(v)).sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+  const visits=rows.length,orders=rows.filter(v=>v.result==="order").length,comp=rows.filter(v=>v.result==="complaint").length,newc=rows.filter(v=>v.type==="新客戶").length;
+  const prod={};rows.forEach(v=>(v.products||[]).forEach(p=>{(prod[p.name]??={qty:0,unit:p.unit||"",who:[]});prod[p.name].qty+=p.qty||0;prod[p.name].who.push(v.customer)}));
+  const plist=Object.entries(prod).sort((a,b)=>b[1].qty-a[1].qty);
+  const todo=rows.filter(v=>["complaint","stock","sample","absent"].includes(v.result)).sort((a,b)=>(b.result==="complaint")-(a.result==="complaint"));
+  const mon=date.slice(0,7),mrows=all.filter(v=>v.date.startsWith(mon)&&inR(v));
+  const mdays=new Set(mrows.map(v=>v.date)).size,mord=mrows.filter(v=>v.result==="order").length,mnew=mrows.filter(v=>v.type==="新客戶").length,mcomp=mrows.filter(v=>v.result==="complaint").length;
+  $("#main").innerHTML=`<div style="display:flex;flex-direction:column;gap:18px">
+  <div class="kpis">
+    <div class="kpi"><b class="num">${visits}</b><span>拜訪家數（新客戶 ${newc}）</span></div>
+    <div class="kpi"><b class="num">${orders}</b><span>成交家數</span></div>
+    <div class="kpi"><b class="num">${visits?Math.round(orders/visits*100):0}%</b><span>成交率</span></div>
+    <div class="kpi"><b class="num" style="color:${comp?"var(--bad)":"inherit"}">${comp}</b><span>客訴／異常</span></div>
+  </div>
+  <section><h2>拜訪明細 <small>${fmtDate(date)}</small></h2>
+  <div class="panel">${rows.length?rowsHtml(rows,false):`<div class="empty">這一天沒有回報。</div>`}</div></section>
+  <div class="grid2">
+    <section><h2>產品訂購彙總</h2><div class="panel">${plist.length?`<ul class="list">${plist.map(([n,o])=>`<li><span>${esc(n)}<div class="note">${esc([...new Set(o.who)].join("、"))}</div></span><b class="num">${o.qty||"—"}${esc(o.unit)}</b></li>`).join("")}</ul>`:`<div class="empty">沒有訂購。</div>`}</div></section>
+    <section><h2>待追蹤</h2><div class="panel">${todo.length?`<ul class="list">${todo.map(v=>`<li><span><b>${esc(v.customer)}</b><div class="note">${esc(v.note||"")}</div></span>${pill(v)}</li>`).join("")}</ul>`:`<div class="empty">沒有待追蹤項目。</div>`}</div></section>
+  </div>
+  <section><h2>本月累計 <small>${mon.replace("-","/")}</small></h2><div class="panel"><div class="mkpis">
+    <span>出勤 <b class="num">${mdays}</b> 天</span><span>拜訪 <b class="num">${mrows.length}</b> 家</span><span>新客戶 <b class="num">${mnew}</b></span><span>成交 <b class="num">${mord}</b> 家（${mrows.length?Math.round(mord/mrows.length*100):0}%）</span><span>客訴 <b class="num">${mcomp}</b></span>
+  </div></div></section></div>`;
+}
+
+function search(q){
+  if(!q){$("#qres").innerHTML=`<div class="empty">輸入店名後顯示。</div>`;return;}
+  const rows=all.filter(v=>v.customer.includes(q)).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  $("#qres").innerHTML=rows.length?`<div class="mkpis"><span>共 <b class="num">${rows.length}</b> 筆</span><span>成交 <b class="num">${rows.filter(v=>v.result==="order").length}</b> 筆</span><span>最近拜訪 <b class="num">${rows[0].date}</b></span></div>${rowsHtml(rows.slice(0,100),true)}${rows.length>100?`<div class="empty">只顯示最近 100 筆。</div>`:""}`:`<div class="empty">找不到「${esc(q)}」。</div>`;
+}
+</script>
+</body>
+</html>
